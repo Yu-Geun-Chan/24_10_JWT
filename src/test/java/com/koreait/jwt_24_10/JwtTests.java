@@ -73,4 +73,38 @@ class JwtTests {
 
         assertThat(accessToken).isNotNull();
     }
+
+    @Test
+    @DisplayName("accessToken 인증(만료 여부 체크)")
+    void t6() {
+        // claims은 key라고 보면 된다.
+        Map<String,Object> claims = new HashMap<>();
+        claims.put("id", 1L);
+        claims.put("username", "admin");
+
+        // 현재 시각을 기준으로 이미 만료된 토큰 생성
+        String accessToken = jwtProvider.getToken(claims,-1);
+        System.out.println("accessToken : " + accessToken);
+
+        assertThat(jwtProvider.verify(accessToken)).isFalse(); // 이미 토큰은 만료 이니까 false인게 맞다.
+    }
+
+    @Test
+    @DisplayName("accessToken을 통해서 claims를 얻을 수 있다.")
+    void t7() {
+        // claims은 key라고 보면 된다.
+        Map<String,Object> claims = new HashMap<>();
+        claims.put("id", 1L);
+        claims.put("username", "admin");
+
+        // 현재 시각을 기준으로 5시간의 유효시간을 가지는 토큰 생성
+        String accessToken = jwtProvider.getToken(claims,60 * 60 * 5);
+        System.out.println("accessToken : " + accessToken);
+
+        assertThat(jwtProvider.verify(accessToken)).isTrue();
+
+        Map<String, Object> claimsFromToken = jwtProvider.getClaims(accessToken);
+
+        System.out.println("claimsFromToken : " + claimsFromToken);
+    }
 }
